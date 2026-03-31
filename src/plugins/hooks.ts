@@ -33,6 +33,8 @@ import type {
   PluginHookInboundClaimResult,
   PluginHookLlmInputEvent,
   PluginHookLlmOutputEvent,
+  PluginHookBeforeModelCallEvent,
+  PluginHookAfterModelCallEvent,
   PluginHookBeforeResetEvent,
   PluginHookBeforeToolCallEvent,
   PluginHookBeforeToolCallResult,
@@ -86,6 +88,8 @@ export type {
   PluginHookBeforePromptBuildResult,
   PluginHookLlmInputEvent,
   PluginHookLlmOutputEvent,
+  PluginHookBeforeModelCallEvent,
+  PluginHookAfterModelCallEvent,
   PluginHookAgentEndEvent,
   PluginHookBeforeCompactionEvent,
   PluginHookBeforeResetEvent,
@@ -604,6 +608,30 @@ export function createHookRunner(registry: PluginRegistry, options: HookRunnerOp
   }
 
   /**
+   * Run before_model_call hook.
+   * Fires before each real provider model invocation (streamFn call).
+   * Runs in parallel (fire-and-forget).
+   */
+  async function runBeforeModelCall(
+    event: PluginHookBeforeModelCallEvent,
+    ctx: PluginHookAgentContext,
+  ): Promise<void> {
+    return runVoidHook("before_model_call", event, ctx);
+  }
+
+  /**
+   * Run after_model_call hook.
+   * Fires after each real provider model invocation completes or errors.
+   * Runs in parallel (fire-and-forget).
+   */
+  async function runAfterModelCall(
+    event: PluginHookAfterModelCallEvent,
+    ctx: PluginHookAgentContext,
+  ): Promise<void> {
+    return runVoidHook("after_model_call", event, ctx);
+  }
+
+  /**
    * Run before_compaction hook.
    */
   async function runBeforeCompaction(
@@ -1111,6 +1139,8 @@ export function createHookRunner(registry: PluginRegistry, options: HookRunnerOp
     runBeforeAgentReply,
     runLlmInput,
     runLlmOutput,
+    runBeforeModelCall,
+    runAfterModelCall,
     runAgentEnd,
     runBeforeCompaction,
     runAfterCompaction,
